@@ -10,6 +10,7 @@ angular.module('lightPaintApp')
   .directive('gridPaint', function () {
     return {
       scope: {
+        board: '=?',
         boardHeight: '=?',
         boardWidth: '=?',
         row: '=?',
@@ -20,16 +21,35 @@ angular.module('lightPaintApp')
       replace: true,
       link: function postLink(scope, element, attrs) {
 
-        scope.column = scope.column || 10;
-        scope.row = scope.row || 10;
-        scope.canvasSize = {'height' : bh + 50, 'width' : bw + 50};
-        scope.board = initBoard();
+        scope.$watch('row', function (newVal) {
 
-        var rowWidth = scope.boardWidth / scope.row;
-        var rowHeight = scope.boardHeight / scope.column;
-        
-        var bw = scope.boardWidth || 400;
-        var bh = scope.boardHeight || 400;
+          initData();
+          drawBoard();
+        });
+
+        scope.$watch('column', function (newVal) {
+
+          initData();
+          drawBoard();
+        });
+
+        scope.$watch('boardWidth', function (newVal) {
+
+          initData();
+          drawBoard();
+        });
+
+        scope.$watch('boardHeight', function (newVal) {
+
+          initData();
+          drawBoard();
+        });
+
+        var rowWidth;
+        var rowHeight;
+        var canvas = element[0];
+        var context = canvas.getContext("2d");
+        canvas.addEventListener("click", onGridClick, false);
 
         function initBoard () {
           var x = new Array(scope.column);
@@ -67,13 +87,14 @@ angular.module('lightPaintApp')
 
             x -= canvas.offsetLeft;
             y -= canvas.offsetTop;
-            x = Math.min(x, scope.boardWidth * rowHeight);
-            y = Math.min(y, scope.boardHeight * rowWidth);
-            var cell = new Cell(Math.floor(y/rowWidth), Math.floor(x/rowHeight));
+            x = Math.min(x, scope.boardWidth * rowWidth);
+            y = Math.min(y, scope.boardHeight * rowHeight);
+
+            var cell = new Cell(Math.floor(y/rowHeight), Math.floor(x/rowWidth));
             return cell;
         }
 
-        var onGridClick = function (e) {
+        function onGridClick (e) {
           var cell = getCursorPosition(e);
           console.log(cell);
           
@@ -82,20 +103,56 @@ angular.module('lightPaintApp')
               if (cell.row == scope.board[i][j].cell.row && cell.column == scope.board[i][j].cell.column) {
 
                 scope.board[i][j].isClick = !scope.board[i][j].isClick;
-                drawBoard();
 
               }
             }
           }
+
+          scope.$apply();          
+          drawBoard();
+
         }
 
-        var canvas = element[0];
-        canvas.width = bw + 50;
-        canvas.height = bh + 50;
+        function drawPiece(piece, selected) {
+          var p = piece.cell;
+          var column = p.column;
+          var row = p.row;
+          var x = (column * rowWidth) + (rowWidth/2);
+          var y = (row * rowHeight) + (rowHeight/2);
+          var radius = (rowWidth/2) - (rowHeight/10);
+          
+          if (scope.row > scope.column) {
+            radius = (rowWidth/2) - (rowHeight/10);
+          } 
+          else {
+            radius = (rowHeight/2) - (rowWidth/10);
+          }
 
-        canvas.addEventListener("click", onGridClick, false);
+          if (piece.isClick) {
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI*2, false);
+            context.fill();
+            context.fillStyle = "#000";
+            context.stroke();
+          }
+        }
 
-        var context = canvas.getContext("2d");
+        function initData () {
+
+          scope.boardWidth = scope.boardWidth || 400;
+          scope.boardHeight = scope.boardHeight || 400;
+          scope.column = scope.column || 10;
+          scope.row = scope.row || 10;
+          scope.canvasSize = {'height' : scope.boardHeight + scope.row * 0.5, 'width' : scope.boardWidth + scope.column * 0.5};
+          scope.board = initBoard();
+
+          canvas.width = scope.boardWidth + scope.row * 0.5;
+          canvas.height = scope.boardHeight + scope.column * 0.5;
+
+          rowWidth = scope.boardWidth / scope.row;
+          rowHeight = scope.boardHeight / scope.column;
+
+        }
 
         function drawBoard() {
 
@@ -126,30 +183,9 @@ angular.module('lightPaintApp')
 
         }
 
-        function drawPiece(piece, selected) {
-          var p = piece.cell;
-          var column = p.column;
-          var row = p.row;
-          var x = (column * rowWidth) + (rowWidth/2);
-          var y = (row * rowHeight) + (rowHeight/2);
-          var radius = (rowWidth/2) - (rowWidth/10);
-          
-
-          if (piece.isClick) {
-
-            console.log('draw');
-            context.beginPath();
-            context.arc(x, y, radius, 0, Math.PI*2, false);
-            context.fill();
-            context.fillStyle = "#000";
-            // context.closePath();
-            context.stroke();
-          }
-        }
-
+        initData();
         drawBoard();
 
-        // element.text('this is the gridPaint directive');
       }
     };
   });

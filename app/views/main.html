@@ -1,3 +1,59 @@
 <div class="row">
-  <grid-paint board-width="400" board-height="400"></grid-paint>
+
+  <grid-paint board-width="boardWidth" board-height="boardHeight" row="column" column="row" board="board" ></grid-paint>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Input Setting</div>
+    <div class="panel-body">
+      <div class="col-lg-6">
+        <div class="input-group">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Row</button>
+          </span>
+          <input type="number" class="form-control" placeholder="Row" ng-model="row" min="1" max="40" required>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="input-group">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Column</button>
+          </span>
+          <input type="number" class="form-control" placeholder="Column" ng-model="column" min="1" max="40" required>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="input-group">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Board width</button>
+          </span>
+          <input type="number" class="form-control" placeholder="Board width" ng-model="boardWidth" min="1" max="2000" required>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="input-group">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Board height</button>
+          </span>
+          <input type="number" class="form-control" placeholder="Board height" ng-model="boardHeight" min="1" max="3000" required>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Output</div>
+    <div class="panel-body">
+    [
+      <table>
+        <tr ng-repeat="boardColumn in board">
+           <td ng-repeat="piece in boardColumn">
+               {{piece.isClick | number:0 }}
+               <span ng-if="piece.cell.row != row - 1 || piece.cell.column != column - 1">,</span>
+            </td>
+        </tr>
+      </table>
+    ]
+    </div>
+  </div>
+
 </div>
